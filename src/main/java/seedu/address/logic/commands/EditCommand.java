@@ -38,22 +38,23 @@ public class EditCommand extends Command {
     public static final String COMMAND_WORD = "edit";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the person identified "
-            + "by the index number used in the displayed person list. "
-            + "Existing values will be overwritten by the input values.\n"
-            + "Parameters: INDEX (must be a positive integer) "
-            + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_NRIC + "NRIC] "
-            + "[" + PREFIX_PHONE + "PHONE] "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
-            + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_HIRE + "HIRE]...\n"
-            + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_PHONE + "91234567 "
-            + PREFIX_EMAIL + "johndoe@example.com";
+        + "by the index number used in the displayed person list. "
+        + "Existing values will be overwritten by the input values.\n"
+        + "Parameters: INDEX (must be a positive integer) "
+        + "[" + PREFIX_NAME + "NAME] "
+        + "[" + PREFIX_NRIC + "NRIC] "
+        + "[" + PREFIX_PHONE + "PHONE] "
+        + "[" + PREFIX_EMAIL + "EMAIL] "
+        + "[" + PREFIX_ADDRESS + "ADDRESS] "
+        + "[" + PREFIX_HIRE + "HIRE]...\n"
+        + "Example: " + COMMAND_WORD + " 1 "
+        + PREFIX_PHONE + "91234567 "
+        + PREFIX_EMAIL + "johndoe@example.com";
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited Person: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+    public static final String MESSAGE_HIRE_AFTER_LEAVE = "Hire date cannot be after any existing leave dates";
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
@@ -68,6 +69,12 @@ public class EditCommand extends Command {
 
         this.index = index;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    }
+
+    private boolean isHireBeforeAnyLeave(Person person) {
+        Hire hire = person.getHire();
+        List<Leave> leaves = person.getLeaves();
+        return leaves.stream().anyMatch(leave -> hire.toLocalDate().isAfter(leave.getStartDate()));
     }
 
     @Override
@@ -86,10 +93,14 @@ public class EditCommand extends Command {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
+        if (isHireBeforeAnyLeave(editedPerson)) {
+            throw new CommandException("Hire date cannot be after any existing leave dates");
+        }
+
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)),
-                editedPerson);
+            editedPerson);
     }
 
     /**
@@ -110,7 +121,7 @@ public class EditCommand extends Command {
         Attendance updatedAttendance = personToEdit.getAttendance();
 
         return new Person(updatedName, updatedNric, updatedPhone, updatedEmail, updatedAddress, updatedHire,
-                updatedTags, unchangedLeaves, updatedAttendance);
+            updatedTags, unchangedLeaves, updatedAttendance);
     }
 
     @Override
@@ -126,15 +137,15 @@ public class EditCommand extends Command {
 
         EditCommand otherEditCommand = (EditCommand) other;
         return index.equals(otherEditCommand.index)
-                && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
+            && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("index", index)
-                .add("editPersonDescriptor", editPersonDescriptor)
-                .toString();
+            .add("index", index)
+            .add("editPersonDescriptor", editPersonDescriptor)
+            .toString();
     }
 
     /**
@@ -253,23 +264,23 @@ public class EditCommand extends Command {
 
             EditPersonDescriptor otherEditPersonDescriptor = (EditPersonDescriptor) other;
             return Objects.equals(name, otherEditPersonDescriptor.name)
-                    && Objects.equals(nric, otherEditPersonDescriptor.nric)
-                    && Objects.equals(phone, otherEditPersonDescriptor.phone)
-                    && Objects.equals(email, otherEditPersonDescriptor.email)
-                    && Objects.equals(address, otherEditPersonDescriptor.address)
-                    && Objects.equals(hire, otherEditPersonDescriptor.hire);
+                && Objects.equals(nric, otherEditPersonDescriptor.nric)
+                && Objects.equals(phone, otherEditPersonDescriptor.phone)
+                && Objects.equals(email, otherEditPersonDescriptor.email)
+                && Objects.equals(address, otherEditPersonDescriptor.address)
+                && Objects.equals(hire, otherEditPersonDescriptor.hire);
         }
 
         @Override
         public String toString() {
             return new ToStringBuilder(this)
-                    .add("name", name)
-                    .add("nric", nric)
-                    .add("phone", phone)
-                    .add("email", email)
-                    .add("address", address)
-                    .add("hire", hire)
-                    .toString();
+                .add("name", name)
+                .add("nric", nric)
+                .add("phone", phone)
+                .add("email", email)
+                .add("address", address)
+                .add("hire", hire)
+                .toString();
         }
     }
 }
