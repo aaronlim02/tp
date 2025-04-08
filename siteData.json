@@ -62,7 +62,8 @@
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
         "deleting-a-person": "Deleting a person",
-        "saving-data": "Saving data"
+        "saving-data": "Saving data",
+        "appendix-planned-improvements": "Appendix: Planned Improvements"
       },
       "headingKeywords": {}
     },
@@ -134,7 +135,8 @@
         "employee-management": "Employee Management",
         "leave-management": "Leave Management",
         "tag-management": "Tag Management",
-        "system-operations": "System Operations"
+        "system-operations": "System Operations",
+        "parameter-glossary": "Parameter Glossary"
       },
       "headingKeywords": {}
     },
